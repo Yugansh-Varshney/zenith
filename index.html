@@ -94,7 +94,7 @@
     transition: opacity 0.2s !important;
   }
 
-  .nav-cta:hover { opacity: 0.85; }
+  .menu-toggle { display: none; }
 
   /* ── HERO ── */
   .hero {
@@ -1012,21 +1012,79 @@
   /* ── RESPONSIVE ── */
   @media (max-width: 900px) {
     nav { padding: 16px 24px; }
-    nav ul { display: none; }
-    .hero { padding: 100px 24px 60px; }
+    
+    .menu-toggle {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    .menu-toggle span {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: var(--white);
+      transition: 0.3s;
+    }
+
+    nav ul {
+      position: fixed;
+      top: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100vh;
+      background: var(--black);
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 32px;
+      transform: translateX(100%);
+      transition: transform 0.4s cubic-bezier(0.77,0,0.175,1);
+      z-index: 999;
+      display: flex;
+    }
+
+    nav.nav-active ul {
+      transform: translateX(0);
+    }
+
+    nav.nav-active .menu-toggle span:nth-child(1) {
+      transform: translateY(4px) rotate(45deg);
+    }
+
+    nav.nav-active .menu-toggle span:nth-child(2) {
+      transform: translateY(-4px) rotate(-45deg);
+    }
+
+    .hero { padding: 100px 24px 60px; text-align: center; }
     .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    .hero-actions { justify-content: center; flex-direction: column; width: 100%; }
+    .btn-primary { width: 100%; text-align: center; }
+    .btn-ghost { justify-content: center; }
+    .hero-desc { margin-left: auto; margin-right: auto; }
+    
     section { padding: 60px 24px; }
     .steps { grid-template-columns: 1fr; }
     .features-grid { grid-template-columns: 1fr; }
     .feature-card.large { grid-column: span 1; grid-template-columns: 1fr; }
-    .stats-section { grid-template-columns: repeat(2,1fr); padding: 40px; }
+    .stats-section { grid-template-columns: repeat(2,1fr); padding: 40px 20px; gap: 20px; }
     .pricing-grid { grid-template-columns: 1fr; }
     .testimonials-grid { grid-template-columns: 1fr; }
     .contact-section { grid-template-columns: 1fr; gap: 40px; }
-    footer { flex-direction: column; padding: 32px 24px; }
+    footer { flex-direction: column; padding: 32px 24px; text-align: center; gap: 24px; }
+    .footer-links { flex-direction: column; gap: 16px; }
     .form-row { grid-template-columns: 1fr; }
     .floating-stat-1, .floating-stat-2 { display: none; }
     .cta-section { padding: 80px 24px; }
+  }
+
+  @media (max-width: 480px) {
+    h1 { font-size: 36px; }
+    .stats-section { grid-template-columns: 1fr; }
+    .plan-price { font-size: 40px; }
   }
 </style>
 </head>
@@ -1042,6 +1100,10 @@
     <li><a href="#contact">Contact</a></li>
     <li><a href="#contact" class="nav-cta">Get Early Access</a></li>
   </ul>
+  <button class="menu-toggle" aria-label="Toggle Menu">
+    <span></span>
+    <span></span>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -1480,11 +1542,30 @@
     }
   }
 
-  // Smooth nav
+  // Smooth nav & Mobile Menu
+  const nav = document.querySelector('nav');
+  const menuToggle = document.querySelector('.menu-toggle');
+  const navLinks = document.querySelectorAll('nav ul li a');
+
+  if (menuToggle) {
+    menuToggle.addEventListener('click', () => {
+      nav.classList.toggle('nav-active');
+    });
+  }
+
   document.querySelectorAll('a[href^="#"]').forEach(a => {
     a.addEventListener('click', e => {
       const target = document.querySelector(a.getAttribute('href'));
-      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+      if (target) { 
+        e.preventDefault(); 
+        
+        // Close mobile menu if open
+        if (nav.classList.contains('nav-active')) {
+          nav.classList.remove('nav-active');
+        }
+
+        target.scrollIntoView({ behavior: 'smooth' }); 
+      }
     });
   });
 

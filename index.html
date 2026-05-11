@@ -1,232 +1,1502 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zenith-AI | The Peak of Intelligence</title>
-    <style>
-        :root {
-            --bg-color: #050505;
-            --text-main: #ffffff;
-            --text-muted: #a0a0a0;
-            --accent: #00f0ff;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZenithAI — Never Miss a Call Again</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
+  :root {
+    --black: #080B0F;
+    --white: #F5F2EC;
+    --cream: #EDE8DF;
+    --accent: #FF5533;
+    --accent2: #FFB347;
+    --muted: #6B7280;
+    --card: #0F1318;
+    --border: rgba(255,255,255,0.07);
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
 
-        body, html {
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            overflow: hidden;
-        }
+  html { scroll-behavior: smooth; }
 
-        #canvas-container {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
 
-        .content {
-            position: relative;
-            z-index: 2;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
-            padding: 0 20px;
-            pointer-events: none; /* Lets you click the canvas behind it if needed */
-        }
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
 
-        h1 {
-            font-size: 4rem;
-            font-weight: 800;
-            letter-spacing: -2px;
-            margin-bottom: 15px;
-            opacity: 0;
-            animation: fadeUp 1s ease-out 0.5s forwards;
-        }
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    background: rgba(8,11,15,0.8);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
 
-        .highlight {
-            color: var(--accent);
-            text-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
-        }
+  .logo {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+    color: var(--white);
+    text-decoration: none;
+  }
 
-        p {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            max-width: 600px;
-            margin-bottom: 40px;
-            opacity: 0;
-            animation: fadeUp 1s ease-out 0.8s forwards;
-        }
+  .logo span { color: var(--accent); }
 
-        .btn-glow {
-            pointer-events: auto;
-            padding: 15px 35px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--bg-color);
-            background-color: var(--accent);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-            opacity: 0;
-            animation: fadeUp 1s ease-out 1.1s forwards;
-        }
+  nav ul {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
 
-        .btn-glow:hover {
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.8);
-            transform: translateY(-3px);
-        }
+  nav ul a {
+    color: rgba(245,242,236,0.6);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
 
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+  nav ul a:hover { color: var(--white); }
 
-        @media (max-width: 768px) {
-            h1 { font-size: 3rem; }
-            p { font-size: 1rem; }
-        }
-    </style>
+  .nav-cta {
+    background: var(--accent);
+    color: var(--white) !important;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-weight: 500 !important;
+    transition: opacity 0.2s !important;
+  }
+
+  .nav-cta:hover { opacity: 0.85; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 120px 48px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background: 
+      radial-gradient(ellipse 60% 50% at 70% 50%, rgba(255,85,51,0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(255,179,71,0.06) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+    position: relative;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,85,51,0.12);
+    border: 1px solid rgba(255,85,51,0.3);
+    border-radius: 100px;
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(42px, 5vw, 68px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--accent);
+  }
+
+  .hero-desc {
+    font-size: 18px;
+    color: rgba(245,242,236,0.65);
+    font-weight: 300;
+    max-width: 460px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: var(--white);
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 15px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 0 0 0 rgba(255,85,51,0.4);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255,85,51,0.35);
+  }
+
+  .btn-ghost {
+    color: rgba(245,242,236,0.7);
+    font-size: 15px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.2s;
+  }
+
+  .btn-ghost:hover { color: var(--white); }
+
+  /* ── PHONE MOCKUP ── */
+  .hero-visual {
+    position: relative;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  .call-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .call-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,85,51,0.5), transparent);
+  }
+
+  .call-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .call-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4ADE80;
+    font-weight: 500;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    background: #4ADE80;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+  }
+
+  .call-timer {
+    font-family: var(--font-display);
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  .caller-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .caller-avatar {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, #FF5533, #FFB347);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 20px;
+  }
+
+  .caller-name {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 2px;
+  }
+
+  .caller-number {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .transcript {
+    background: rgba(255,255,255,0.04);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .transcript-line {
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 10px;
+  }
+
+  .transcript-line:last-child { margin-bottom: 0; }
+
+  .t-ai { color: var(--accent); font-weight: 500; flex-shrink: 0; }
+  .t-user { color: var(--accent2); font-weight: 500; flex-shrink: 0; }
+  .t-text { color: rgba(245,242,236,0.75); }
+
+  .typing-indicator {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    padding: 4px 0;
+  }
+
+  .typing-dot {
+    width: 5px; height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: typing 1.2s infinite;
+  }
+
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typing {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  .call-action {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(74,222,128,0.08);
+    border: 1px solid rgba(74,222,128,0.2);
+    border-radius: 10px;
+    font-size: 13px;
+    color: #4ADE80;
+  }
+
+  .floating-stat {
+    position: absolute;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 12px;
+  }
+
+  .floating-stat-1 {
+    top: -20px;
+    right: -20px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  .floating-stat-2 {
+    bottom: -20px;
+    left: -20px;
+    animation: float 3s 1.5s ease-in-out infinite;
+  }
+
+  .stat-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--accent);
+  }
+
+  .stat-label { color: var(--muted); font-size: 11px; margin-top: 2px; }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── SOCIAL PROOF ── */
+  .ticker {
+    background: rgba(255,255,255,0.03);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    overflow: hidden;
+  }
+
+  .ticker-inner {
+    display: flex;
+    gap: 60px;
+    animation: ticker 20s linear infinite;
+    width: max-content;
+  }
+
+  .ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .ticker-item span { color: var(--white); }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ── SECTIONS ── */
+  section {
+    padding: 100px 48px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+
+  .section-desc {
+    color: rgba(245,242,236,0.6);
+    font-size: 17px;
+    font-weight: 300;
+    max-width: 560px;
+    line-height: 1.7;
+    margin-bottom: 60px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    background: var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .step {
+    background: var(--black);
+    padding: 40px 36px;
+    position: relative;
+    transition: background 0.3s;
+  }
+
+  .step:hover { background: var(--card); }
+
+  .step-num {
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 800;
+    color: rgba(255,85,51,0.08);
+    line-height: 1;
+    margin-bottom: 20px;
+    position: absolute;
+    top: 20px; right: 24px;
+  }
+
+  .step-icon {
+    width: 48px; height: 48px;
+    background: rgba(255,85,51,0.1);
+    border: 1px solid rgba(255,85,51,0.2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+
+  .step h3 {
+    font-family: var(--font-display);
+    font-size: 19px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .step p {
+    color: rgba(245,242,236,0.55);
+    font-size: 14px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    transition: border-color 0.3s, transform 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feature-card:hover {
+    border-color: rgba(255,85,51,0.3);
+    transform: translateY(-4px);
+  }
+
+  .feature-card.large {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+
+  .feature-icon {
+    font-size: 32px;
+    margin-bottom: 16px;
+  }
+
+  .feature-card h3 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .feature-card p {
+    color: rgba(245,242,236,0.55);
+    font-size: 14px;
+    line-height: 1.7;
+    font-weight: 300;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    background: rgba(255,85,51,0.1);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+  }
+
+  /* ── STATS ── */
+  .stats-section {
+    background: rgba(255,85,51,0.04);
+    border: 1px solid rgba(255,85,51,0.1);
+    border-radius: 24px;
+    padding: 60px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 40px;
+    text-align: center;
+  }
+
+  .stat-item h3 {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+  }
+
+  .stat-item p {
+    color: rgba(245,242,236,0.55);
+    font-size: 14px;
+    font-weight: 300;
+  }
+
+  /* ── PRICING ── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+
+  .pricing-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    position: relative;
+    transition: transform 0.3s;
+  }
+
+  .pricing-card:hover { transform: translateY(-6px); }
+
+  .pricing-card.featured {
+    border-color: var(--accent);
+    background: linear-gradient(135deg, rgba(255,85,51,0.08), var(--card));
+  }
+
+  .featured-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 16px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+
+  .plan-name {
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .plan-price {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 4px;
+  }
+
+  .plan-price span {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--muted);
+    letter-spacing: 0;
+  }
+
+  .plan-desc {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 28px;
+    font-weight: 300;
+  }
+
+  .plan-features {
+    list-style: none;
+    margin-bottom: 32px;
+  }
+
+  .plan-features li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: rgba(245,242,236,0.75);
+    margin-bottom: 12px;
+    font-weight: 300;
+  }
+
+  .plan-features li::before {
+    content: '✓';
+    color: #4ADE80;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .btn-plan {
+    width: 100%;
+    padding: 13px;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+  }
+
+  .btn-plan-primary {
+    background: var(--accent);
+    color: var(--white);
+  }
+
+  .btn-plan-primary:hover { opacity: 0.85; }
+
+  .btn-plan-ghost {
+    background: transparent;
+    color: var(--white);
+    border: 1px solid var(--border);
+  }
+
+  .btn-plan-ghost:hover { border-color: rgba(255,255,255,0.2); }
+
+  /* ── TESTIMONIALS ── */
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .testimonial {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: transform 0.3s;
+  }
+
+  .testimonial:hover { transform: translateY(-4px); }
+
+  .stars {
+    color: var(--accent2);
+    font-size: 14px;
+    margin-bottom: 16px;
+    letter-spacing: 2px;
+  }
+
+  .testimonial blockquote {
+    color: rgba(245,242,236,0.75);
+    font-size: 14px;
+    line-height: 1.7;
+    font-weight: 300;
+    font-style: italic;
+    margin-bottom: 20px;
+  }
+
+  .testimonial-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .author-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+    font-family: var(--font-display);
+  }
+
+  .author-name {
+    font-weight: 500;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .author-role {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    text-align: center;
+    padding: 120px 48px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(255,85,51,0.08), transparent 70%);
+    pointer-events: none;
+  }
+
+  .cta-section h2 {
+    font-size: clamp(36px, 5vw, 64px);
+    margin-bottom: 20px;
+  }
+
+  .cta-section p {
+    color: rgba(245,242,236,0.6);
+    font-size: 18px;
+    font-weight: 300;
+    max-width: 500px;
+    margin: 0 auto 40px;
+  }
+
+  .cta-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  /* ── CONTACT ── */
+  .contact-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+
+  .contact-info h2 { margin-bottom: 20px; }
+
+  .contact-info p {
+    color: rgba(245,242,236,0.6);
+    font-weight: 300;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .contact-detail {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .contact-icon {
+    width: 44px; height: 44px;
+    background: rgba(255,85,51,0.1);
+    border: 1px solid rgba(255,85,51,0.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .contact-detail-text strong {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 2px;
+    font-size: 14px;
+  }
+
+  .contact-detail-text span {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .contact-form {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+  }
+
+  .form-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 28px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(245,242,236,0.7);
+    margin-bottom: 8px;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--white);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: rgba(255,85,51,0.4);
+  }
+
+  .form-group select option { background: #1a1f26; }
+
+  .form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.2s;
+    margin-top: 8px;
+  }
+
+  .submit-btn:hover {
+    opacity: 0.85;
+    transform: translateY(-1px);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .footer-logo {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 20px;
+    color: var(--white);
+    text-decoration: none;
+  }
+
+  .footer-logo span { color: var(--accent); }
+
+  .footer-links {
+    display: flex;
+    gap: 32px;
+    list-style: none;
+  }
+
+  .footer-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--white); }
+
+  .footer-copy {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ── DIVIDER ── */
+  .full-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 0;
+  }
+
+  /* ── SCROLL ANIMATIONS ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    nav ul { display: none; }
+    .hero { padding: 100px 24px 60px; }
+    .hero-grid { grid-template-columns: 1fr; gap: 48px; }
+    section { padding: 60px 24px; }
+    .steps { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .feature-card.large { grid-column: span 1; grid-template-columns: 1fr; }
+    .stats-section { grid-template-columns: repeat(2,1fr); padding: 40px; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    .contact-section { grid-template-columns: 1fr; gap: 40px; }
+    footer { flex-direction: column; padding: 32px 24px; }
+    .form-row { grid-template-columns: 1fr; }
+    .floating-stat-1, .floating-stat-2 { display: none; }
+    .cta-section { padding: 80px 24px; }
+  }
+</style>
 </head>
 <body>
 
-    <canvas id="canvas-container"></canvas>
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Zenith<span>AI</span></a>
+  <ul>
+    <li><a href="#how">How it Works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="#contact" class="nav-cta">Get Early Access</a></li>
+  </ul>
+</nav>
 
-    <div class="content">
-        <h1>Welcome to <span class="highlight">Zenith-AI</span></h1>
-        <p>We are building intelligent, high-performance systems for the next generation of builders. The future is being written.</p>
-        <button class="btn-glow" onclick="alert('Waitlist integration coming soon!')">Join the Waitlist</button>
+<!-- HERO -->
+<section class="hero" style="max-width:100%;padding:120px 48px 80px;">
+  <div class="hero-bg"></div>
+  <div class="hero-grid">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <div class="badge-dot"></div>
+        AI-Powered Voice Agent · Made for India
+      </div>
+      <h1>Never lose a<br><em>lead</em> to a<br>missed call.</h1>
+      <p class="hero-desc">ZenithAI answers every call instantly — books appointments, answers FAQs, and sends you a WhatsApp summary. In Hindi, English, or Hinglish.</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn-primary">Start Free Trial →</a>
+        <a href="#how" class="btn-ghost">See how it works ↓</a>
+      </div>
     </div>
+    <div class="hero-visual">
+      <div class="floating-stat floating-stat-1">
+        <div class="stat-num">2 min</div>
+        <div class="stat-label">avg response time</div>
+      </div>
+      <div class="call-card">
+        <div class="call-header">
+          <div class="call-status">
+            <div class="status-dot"></div>
+            Live Call
+          </div>
+          <div class="call-timer">02:14</div>
+        </div>
+        <div class="caller-info">
+          <div class="caller-avatar">R</div>
+          <div>
+            <div class="caller-name">Rahul Verma</div>
+            <div class="caller-number">+91 98765 43210</div>
+          </div>
+        </div>
+        <div class="transcript">
+          <div class="transcript-line">
+            <span class="t-ai">AI:</span>
+            <span class="t-text">Hello, kya main Rahul ji se baat kar sakta hun?</span>
+          </div>
+          <div class="transcript-line">
+            <span class="t-user">You:</span>
+            <span class="t-text">Haan, main Rahul bol raha hun. Dental checkup ke baare mein puchna tha.</span>
+          </div>
+          <div class="transcript-line">
+            <span class="t-ai">AI:</span>
+            <span class="t-text">Bilkul Rahul ji! Dr. Sharma ke paas Monday morning 10am ka slot available hai. Shall I book it?</span>
+          </div>
+          <div class="transcript-line">
+            <span class="t-user">You:</span>
+            <span class="t-text">Yes, please book it.</span>
+          </div>
+          <div class="transcript-line">
+            <span class="t-ai">AI:</span>
+            <div class="typing-indicator">
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+              <div class="typing-dot"></div>
+            </div>
+          </div>
+        </div>
+        <div class="call-action">
+          <span>📅 Appointment booked — Mon 10:00 AM</span>
+          <span>✓</span>
+        </div>
+      </div>
+      <div class="floating-stat floating-stat-2">
+        <div class="stat-num">₹0</div>
+        <div class="stat-label">missed revenue today</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <script>
-        // Neural Network Particle Animation
-        const canvas = document.getElementById('canvas-container');
-        const ctx = canvas.getContext('2d');
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner">
+    <div class="ticker-item">🦷 <span>Dental Clinics</span> — book appointments 24/7</div>
+    <div class="ticker-item">🏋️ <span>Gyms & Fitness</span> — capture membership enquiries</div>
+    <div class="ticker-item">🏠 <span>Real Estate</span> — never miss a hot lead</div>
+    <div class="ticker-item">📚 <span>Coaching Institutes</span> — handle admission calls</div>
+    <div class="ticker-item">💆 <span>Salons & Spas</span> — book slots automatically</div>
+    <div class="ticker-item">🏥 <span>Hospitals</span> — patient enquiries handled</div>
+    <div class="ticker-item">🦷 <span>Dental Clinics</span> — book appointments 24/7</div>
+    <div class="ticker-item">🏋️ <span>Gyms & Fitness</span> — capture membership enquiries</div>
+    <div class="ticker-item">🏠 <span>Real Estate</span> — never miss a hot lead</div>
+    <div class="ticker-item">📚 <span>Coaching Institutes</span> — handle admission calls</div>
+    <div class="ticker-item">💆 <span>Salons & Spas</span> — book slots automatically</div>
+    <div class="ticker-item">🏥 <span>Hospitals</span> — patient enquiries handled</div>
+  </div>
+</div>
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+<hr class="full-divider">
 
-        let particlesArray = [];
-        const mouse = { x: null, y: null, radius: 150 };
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label reveal">How It Works</div>
+  <h2 class="reveal">Set up in minutes.<br>Works around the clock.</h2>
+  <p class="section-desc reveal">No technical expertise needed. We handle everything from the first ring to the WhatsApp summary.</p>
+  <div class="steps reveal">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-icon">📋</div>
+      <h3>Customer fills your form</h3>
+      <p>Embed our simple callback form on your website, WhatsApp, or Instagram bio. Customer enters name, number, and query.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">🤖</div>
+      <div class="step-num">02</div>
+      <h3>AI calls them back instantly</h3>
+      <p>Within 2 minutes, ZenithAI calls the customer in natural Hinglish — already knowing their name and why they're calling.</p>
+    </div>
+    <div class="step">
+      <div class="step-icon">📲</div>
+      <div class="step-num">03</div>
+      <h3>You get a WhatsApp summary</h3>
+      <p>After every call, you receive a full summary: what was discussed, what was booked, and the next action needed.</p>
+    </div>
+  </div>
+</section>
 
-        window.addEventListener('mousemove', function(event) {
-            mouse.x = event.x;
-            mouse.y = event.y;
-        });
+<hr class="full-divider">
 
-        class Particle {
-            constructor(x, y, directionX, directionY, size, color) {
-                this.x = x;
-                this.y = y;
-                this.directionX = directionX;
-                this.directionY = directionY;
-                this.size = size;
-                this.color = color;
-            }
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-            }
-            update() {
-                if (this.x > canvas.width || this.x < 0) this.directionX = -this.directionX;
-                if (this.y > canvas.height || this.y < 0) this.directionY = -this.directionY;
+<!-- STATS -->
+<section style="padding: 80px 48px;">
+  <div class="stats-section reveal">
+    <div class="stat-item">
+      <h3>62%</h3>
+      <p>of SMB calls go unanswered in India daily</p>
+    </div>
+    <div class="stat-item">
+      <h3>2min</h3>
+      <p>average callback time after form submission</p>
+    </div>
+    <div class="stat-item">
+      <h3>₹2.4</h3>
+      <p>cost per call — cheaper than any human receptionist</p>
+    </div>
+    <div class="stat-item">
+      <h3>24/7</h3>
+      <p>never miss an after-hours lead again</p>
+    </div>
+  </div>
+</section>
 
-                // Mouse interactivity
-                let dx = mouse.x - this.x;
-                let dy = mouse.y - this.y;
-                let distance = Math.sqrt(dx * dx + dy * dy);
-                if (distance < mouse.radius + this.size) {
-                    if (mouse.x < this.x && this.x < canvas.width - this.size * 10) this.x += 3;
-                    if (mouse.x > this.x && this.x > this.size * 10) this.x -= 3;
-                    if (mouse.y < this.y && this.y < canvas.height - this.size * 10) this.y += 3;
-                    if (mouse.y > this.y && this.y > this.size * 10) this.y -= 3;
-                }
-                
-                this.x += this.directionX;
-                this.y += this.directionY;
-                this.draw();
-            }
-        }
+<hr class="full-divider">
 
-        function init() {
-            particlesArray = [];
-            let numberOfParticles = (canvas.height * canvas.width) / 10000;
-            for (let i = 0; i < numberOfParticles; i++) {
-                let size = (Math.random() * 2) + 1;
-                let x = (Math.random() * ((innerWidth - size * 2) - (size * 2)) + size * 2);
-                let y = (Math.random() * ((innerHeight - size * 2) - (size * 2)) + size * 2);
-                let directionX = (Math.random() * 2) - 1;
-                let directionY = (Math.random() * 2) - 1;
-                let color = 'rgba(0, 240, 255, 0.8)';
-                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
-            }
-        }
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-label reveal">Features</div>
+  <h2 class="reveal">Everything your business needs.</h2>
+  <p class="section-desc reveal">Built specifically for Indian SMBs. Speaks your customers' language, works with your existing tools.</p>
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-icon">🗣️</div>
+      <div class="feature-tag">Language</div>
+      <h3>Natural Hinglish Voice</h3>
+      <p>Powered by Sarvam AI's Bulbul voice model — trained specifically on Indian speech patterns, accents, and code-switching between Hindi and English.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🧠</div>
+      <div class="feature-tag">Intelligence</div>
+      <h3>Context-Aware Conversations</h3>
+      <p>The AI already knows the caller's name and query before the call starts. Every conversation feels personal, not robotic.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">📅</div>
+      <div class="feature-tag">Automation</div>
+      <h3>Appointment Booking</h3>
+      <p>Directly books slots on Google Calendar. Sends confirmation to the customer and a summary to you via WhatsApp — zero manual work.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">📊</div>
+      <div class="feature-tag">Insights</div>
+      <h3>Lead Tracking Dashboard</h3>
+      <p>Every call logged automatically in Google Sheets. Track status, call summaries, and follow-ups — your lightweight CRM.</p>
+    </div>
+    <div class="feature-card large reveal">
+      <div>
+        <div class="feature-icon">🔄</div>
+        <div class="feature-tag">Flexibility</div>
+        <h3>Works Both Ways — Inbound & Outbound</h3>
+        <p>Handles missed inbound calls when you're busy, and proactively calls back customers who fill your form. One system, two powerful modes.</p>
+        <br>
+        <p style="color:rgba(245,242,236,0.4); font-size:13px;">Coming soon: WhatsApp AI, Instagram DM integration, multi-language support (Tamil, Telugu, Gujarati)</p>
+      </div>
+      <div style="background: rgba(255,85,51,0.05); border-radius: 12px; padding: 24px; border: 1px solid rgba(255,85,51,0.1);">
+        <div style="font-size:13px; color: var(--muted); margin-bottom:16px; font-weight:500;">SUPPORTED INTEGRATIONS</div>
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+          <span style="background:rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color: rgba(245,242,236,0.7);">📅 Google Calendar</span>
+          <span style="background:rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color: rgba(245,242,236,0.7);">📊 Google Sheets</span>
+          <span style="background:rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color: rgba(245,242,236,0.7);">💬 WhatsApp</span>
+          <span style="background:rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color: rgba(245,242,236,0.7);">📝 Tally Forms</span>
+          <span style="background:rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color: rgba(245,242,236,0.7);">🔗 Webhooks</span>
+          <span style="background:rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color: rgba(245,242,236,0.7);">📞 Twilio / Airtel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        function animate() {
-            requestAnimationFrame(animate);
-            ctx.clearRect(0, 0, innerWidth, innerHeight);
-            for (let i = 0; i < particlesArray.length; i++) {
-                particlesArray[i].update();
-            }
-            connect();
-        }
+<hr class="full-divider">
 
-        function connect() {
-            let opacityValue = 1;
-            for (let a = 0; a < particlesArray.length; a++) {
-                for (let b = a; b < particlesArray.length; b++) {
-                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x)) + 
-                                   ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
-                    if (distance < (canvas.width / 7) * (canvas.height / 7)) {
-                        opacityValue = 1 - (distance / 20000);
-                        ctx.strokeStyle = 'rgba(0, 240, 255,' + opacityValue + ')';
-                        ctx.lineWidth = 1;
-                        ctx.beginPath();
-                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
-                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-        }
+<!-- PRICING -->
+<section id="pricing">
+  <div class="section-label reveal">Pricing</div>
+  <h2 class="reveal">Simple, honest pricing.</h2>
+  <p class="section-desc reveal">No hidden fees. No per-seat nonsense. Pay for what you use. Cancel anytime.</p>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal">
+      <div class="plan-name">Starter</div>
+      <div class="plan-price">₹2,999<span>/mo</span></div>
+      <div class="plan-desc">Perfect for small clinics, salons, and local businesses</div>
+      <ul class="plan-features">
+        <li>Up to 200 calls/month</li>
+        <li>Hinglish AI voice (Sarvam)</li>
+        <li>WhatsApp summaries</li>
+        <li>Google Sheets lead log</li>
+        <li>Business hours call routing</li>
+        <li>Email support</li>
+      </ul>
+      <button class="btn-plan btn-plan-ghost" onclick="document.getElementById('contact').scrollIntoView()">Get Started</button>
+    </div>
+    <div class="pricing-card featured reveal">
+      <div class="featured-badge">Most Popular</div>
+      <div class="plan-name">Growth</div>
+      <div class="plan-price">₹6,999<span>/mo</span></div>
+      <div class="plan-desc">For growing businesses handling high call volume</div>
+      <ul class="plan-features">
+        <li>Up to 1,000 calls/month</li>
+        <li>Custom voice & greeting</li>
+        <li>Google Calendar booking</li>
+        <li>CRM integration (Zoho/HubSpot)</li>
+        <li>Analytics dashboard</li>
+        <li>Priority WhatsApp support</li>
+        <li>After-hours SMS fallback</li>
+      </ul>
+      <button class="btn-plan btn-plan-primary" onclick="document.getElementById('contact').scrollIntoView()">Start Free Trial</button>
+    </div>
+    <div class="pricing-card reveal">
+      <div class="plan-name">Pro</div>
+      <div class="plan-price">₹14,999<span>/mo</span></div>
+      <div class="plan-desc">For multi-location businesses and enterprises</div>
+      <ul class="plan-features">
+        <li>Unlimited calls</li>
+        <li>Multiple business profiles</li>
+        <li>Regional language support</li>
+        <li>Custom AI training on your FAQs</li>
+        <li>Dedicated account manager</li>
+        <li>SLA guarantee</li>
+        <li>White-label available</li>
+      </ul>
+      <button class="btn-plan btn-plan-ghost" onclick="document.getElementById('contact').scrollIntoView()">Contact Sales</button>
+    </div>
+  </div>
+  <p style="text-align:center; color:var(--muted); font-size:13px; margin-top:24px; font-weight:300;">All plans include a 14-day free trial. No credit card required.</p>
+</section>
 
-        window.addEventListener('resize', function() {
-            canvas.width = innerWidth;
-            canvas.height = innerHeight;
-            init();
-        });
+<hr class="full-divider">
 
-        window.addEventListener('mouseout', function() {
-            mouse.x = undefined;
-            mouse.y = undefined;
-        });
+<!-- TESTIMONIALS -->
+<section>
+  <div class="section-label reveal">Early Feedback</div>
+  <h2 class="reveal">Businesses love it.</h2>
+  <p class="section-desc reveal">From our pilot program across clinics and coaching institutes in Delhi and Mumbai.</p>
+  <div class="testimonials-grid">
+    <div class="testimonial reveal">
+      <div class="stars">★★★★★</div>
+      <blockquote>"Meri clinic mein subah ki appointments pehle miss ho jaati thi jab main rounds pe hota tha. Ab ZenithAI sab handle kar leta hai. Game changer."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background: linear-gradient(135deg,#FF5533,#FFB347);">D</div>
+        <div>
+          <div class="author-name">Dr. Ankit Sharma</div>
+          <div class="author-role">Dental Clinic, Delhi</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial reveal">
+      <div class="stars">★★★★★</div>
+      <blockquote>"We were losing at least 15 membership enquiries every week. ZenithAI calls them back within minutes. Our conversions went up 40% in the first month."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background: linear-gradient(135deg,#6366F1,#8B5CF6);">P</div>
+        <div>
+          <div class="author-name">Priya Malhotra</div>
+          <div class="author-role">FitZone Gym, Mumbai</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial reveal">
+      <div class="stars">★★★★★</div>
+      <blockquote>"Admission season mein 200+ calls aate the roz. Staff overwhelmed ho jaata tha. Ab ZenithAI initial enquiries handle karta hai — hum sirf serious leads pe focus karte hain."</blockquote>
+      <div class="testimonial-author">
+        <div class="author-avatar" style="background: linear-gradient(135deg,#10B981,#059669);">R</div>
+        <div>
+          <div class="author-name">Rajesh Kumar</div>
+          <div class="author-role">Pinnacle Coaching, Patna</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        init();
-        animate();
-    </script>
+<hr class="full-divider">
+
+<!-- CONTACT -->
+<section id="contact" style="max-width:1200px;margin:0 auto;padding:100px 48px;">
+  <div class="contact-section">
+    <div class="contact-info">
+      <div class="section-label reveal">Get In Touch</div>
+      <h2 class="reveal">Ready to stop missing calls?</h2>
+      <p class="reveal">Fill the form and we'll set up a free 10-minute demo — live, on your actual phone number. See ZenithAI call you back in real time.</p>
+      <div class="contact-detail reveal">
+        <div class="contact-icon">📧</div>
+        <div class="contact-detail-text">
+          <strong>Email us</strong>
+          <span>yuganshvarshney@gmail.com</span>
+        </div>
+      </div>
+      <div class="contact-detail reveal">
+        <div class="contact-icon">💬</div>
+        <div class="contact-detail-text">
+          <strong>WhatsApp</strong>
+          <span><a href="https://wa.me/919354696787" target="_blank" style="color:inherit;text-decoration:none;">+91 93546 96787</a></span>
+        </div>
+      </div>
+      <div class="contact-detail reveal">
+        <div class="contact-icon">📍</div>
+        <div class="contact-detail-text">
+          <strong>Based in</strong>
+          <span>India — serving SMBs across all major cities</span>
+        </div>
+      </div>
+      <div class="contact-detail reveal">
+        <div class="contact-icon">⏰</div>
+        <div class="contact-detail-text">
+          <strong>Response time</strong>
+          <span>We reply within 2 hours on WhatsApp</span>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form reveal">
+      <div class="form-title">Book a Free Demo</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" placeholder="Rahul Sharma">
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" placeholder="+91 98765 43210">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Business Name</label>
+        <input type="text" placeholder="Dr. Sharma's Dental Clinic">
+      </div>
+      <div class="form-group">
+        <label>Business Type</label>
+        <select>
+          <option value="">Select your business type</option>
+          <option>Dental / Medical Clinic</option>
+          <option>Gym / Fitness Center</option>
+          <option>Real Estate / Broker</option>
+          <option>Coaching / Tuition Institute</option>
+          <option>Salon / Spa</option>
+          <option>Restaurant / Hospitality</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>How many calls do you miss per day?</label>
+        <select>
+          <option value="">Roughly estimate</option>
+          <option>1–5 calls/day</option>
+          <option>5–20 calls/day</option>
+          <option>20–50 calls/day</option>
+          <option>50+ calls/day</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Anything else? (optional)</label>
+        <textarea placeholder="Tell us about your business or any specific requirements..."></textarea>
+      </div>
+      <button class="submit-btn" onclick="handleSubmit(this)">Book My Free Demo →</button>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div style="background: var(--accent); padding: 60px 48px; text-align:center;">
+  <h2 style="font-family:var(--font-display); font-size:clamp(28px,4vw,48px); font-weight:800; letter-spacing:-1.5px; margin-bottom:16px; color:var(--white);">14 days free. No card needed. Setup in 30 minutes.</h2>
+  <p style="color:rgba(255,255,255,0.75); font-size:17px; font-weight:300; margin-bottom:32px;">Join businesses across India who stopped losing leads to missed calls.</p>
+  <a href="#contact" class="btn-primary" style="background:var(--white); color:var(--accent); font-weight:700;">Start Free Trial →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="footer-logo">Zenith<span>AI</span></a>
+  <ul class="footer-links">
+    <li><a href="#how">How it Works</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="mailto:yuganshvarshney@gmail.com">yuganshvarshney@gmail.com</a></li>
+  </ul>
+  <div class="footer-copy">© 2026 ZenithAI. Built in India 🇮🇳</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  reveals.forEach(el => observer.observe(el));
+
+  // Form submit
+  function handleSubmit(btn) {
+    btn.textContent = '✓ Demo Booked! We\'ll WhatsApp you shortly.';
+    btn.style.background = '#4ADE80';
+    btn.style.color = '#080B0F';
+    btn.disabled = true;
+    
+    // Clear form inputs
+    const form = btn.closest('.contact-form');
+    if (form) {
+      form.querySelectorAll('input, textarea, select').forEach(el => el.value = '');
+    }
+  }
+
+  // Smooth nav
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+
+  // Animate call timer
+  let seconds = 134;
+  setInterval(() => {
+    seconds++;
+    const m = Math.floor(seconds/60).toString().padStart(2,'0');
+    const s = (seconds%60).toString().padStart(2,'0');
+    const timer = document.querySelector('.call-timer');
+    if (timer) timer.textContent = `${m}:${s}`;
+  }, 1000);
+</script>
 </body>
 </html>
